@@ -45,28 +45,25 @@ def getrecentevents(results):
         start = event['start'].get('dateTime', event['start'].get('date'))
 
         date = datetime.datetime.strftime(dtparse(start), format='%d %B %Y')
-        time = datetime.datetime.strftime(dtparse(start), format='%H:%M')
+        start = datetime.datetime.strftime(dtparse(start), format='%H:%M')
+        end = datetime.datetime.strftime(dtparse(event['end'].get('dateTime', event['end'].get('date'))),
+                                         format='%H:%M')
 
-        print(date, time)
-
-        end = event['end'].get('dateTime', event['end'].get('date'))
-
-        # duration
-
-        # 2019-06-01T12:45:00+01:00
+        duration = datetime.datetime.strptime(end, "%H:%M") - datetime.datetime.strptime(start, "%H:%M")
+        duration = duration.seconds//3600
 
         summary = event['summary']
         location = event["location"]
 
-        appointment = []
-        print(appointment)
+
         try:
             description = event["description"]
         except KeyError:
-            print("start", event['summary'], event["location"])
-        else:
-            print("start", event['summary'], event["location"], event["description"])
+            description = ""
 
+        appointment = [date, start, end, duration, summary, location, description]
+        print(appointment)
+        return appointment
 
 if __name__ == '__main__':
     initiate()
