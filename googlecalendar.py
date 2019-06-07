@@ -67,4 +67,3 @@ def getrecentevents(results):
 
 if __name__ == '__main__':
     initiate()
-    getrecentevents(5)
