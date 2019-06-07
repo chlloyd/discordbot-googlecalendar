@@ -1,4 +1,4 @@
-# discord-calendar-webhook
+# discordbot-googlecalendar
 Send up coming Google Calendar events to discord with a discord bot. 
 
 Send reminders of events for an upcoming group project.
