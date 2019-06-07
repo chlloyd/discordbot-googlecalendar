@@ -1,13 +1,14 @@
 import discord
 
 import googlecalendar
+from tokens import *
 
-client = discord.Client()
+client = discord.Client(Game="Saving the World")
 
 
 @client.event
 async def on_ready():
-    print('We have logged in as {0.user}'.format(client))
+    print('The bot is Ready. We have logged in as {0.user}'.format(client))
 
 
 @client.event
@@ -25,4 +26,4 @@ async def on_message(message):
             contentlist[4], contentlist[0], contentlist[1], contentlist[3], contentlist[5]))
 
 
-client.run('NTg2NDc3MDM4NjAxMjQwNTc2.XPol_Q.d_ZTf7UXch_EahhhQ4FSiCXIp7I')
+client.run(TOKEN)
