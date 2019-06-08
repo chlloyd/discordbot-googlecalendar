@@ -6,6 +6,8 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from dateutil.parser import parse as dtparse
 
+import config
+
 # If modifying these scopes, delete the file token.pickle.
 SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
 
@@ -32,38 +34,58 @@ def initiate():
 def getrecentevents(results):
     # Call the Calendar API
     now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time
-    print('Getting the upcoming %i events' % results)
-    events_result = initiate().events().list(calendarId='bolkubtob5hn0q1i9btftud944@group.calendar.google.com',
+    # print('Getting the upcoming %i events' % results)
+    events_result = initiate().events().list(calendarId=config.CALENDAR,
                                              timeMin=now,
                                              maxResults=results, singleEvents=True,
                                              orderBy='startTime').execute()
     events = events_result.get('items', [])
 
+    oraganisetolist(events)
+
+
+def gettomorrowevents(results=250):
+    tomorrow = datetime.datetime.utcnow() + datetime.timedelta(days=1)
+    tomorrowrfc39 = tomorrow.strftime("%Y-%m-%dT00:00:00-01:00")
+    dayafter = datetime.datetime.utcnow() + datetime.timedelta(days=2)
+    dayafterrfc39 = dayafter.strftime("%Y-%m-%dT00:00:00-01:00")
+    print(tomorrowrfc39, dayafterrfc39)
+    print('Getting the upcoming %i events' % results)
+    events_result = initiate().events().list(calendarId=config.CALENDAR, maxResults=results, singleEvents=True,
+                                             timeMin=tomorrowrfc39, timeMax=dayafterrfc39,
+                                             orderBy='startTime').execute()
+    events = events_result.get('items', [])
+    oraganisetolist(events)
+
+
+def oraganisetolist(events):
     if not events:
-        print('No upcoming events found.')
-    for event in events:
-        start = event['start'].get('dateTime', event['start'].get('date'))
+        return "No Events Found"
+    else:
+        all_appointments = []
+        for event in events:
+            start = event['start'].get('dateTime', event['start'].get('date'))
 
-        date = datetime.datetime.strftime(dtparse(start), format='%d %B %Y')
-        start = datetime.datetime.strftime(dtparse(start), format='%H:%M')
-        end = datetime.datetime.strftime(dtparse(event['end'].get('dateTime', event['end'].get('date'))),
-                                         format='%H:%M')
+            date = datetime.datetime.strftime(dtparse(start), format='%d %B %Y')
+            start = datetime.datetime.strftime(dtparse(start), format='%H:%M')
+            end = datetime.datetime.strftime(dtparse(event['end'].get('dateTime', event['end'].get('date'))),
+                                             format='%H:%M')
 
-        duration = datetime.datetime.strptime(end, "%H:%M") - datetime.datetime.strptime(start, "%H:%M")
-        duration = duration.seconds//3600
+            duration = datetime.datetime.strptime(end, "%H:%M") - datetime.datetime.strptime(start, "%H:%M")
+            duration = duration.seconds // 3600
 
-        summary = event['summary']
-        location = event["location"]
+            summary = event['summary']
+            location = event["location"]
 
+            try:
+                description = event["description"]
+            except KeyError:
+                description = ""
 
-        try:
-            description = event["description"]
-        except KeyError:
-            description = ""
+            appointment = [date, start, end, duration, summary, location, description]
+            all_appointments.append(appointment)
+        return all_appointments
 
-        appointment = [date, start, end, duration, summary, location, description]
-        print(appointment)
-        return appointment
 
 if __name__ == '__main__':
     initiate()
