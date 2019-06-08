@@ -40,8 +40,8 @@ def getrecentevents(results):
                                              maxResults=results, singleEvents=True,
                                              orderBy='startTime').execute()
     events = events_result.get('items', [])
-
-    oraganisetolist(events)
+    print(events)
+    return oraganisetolist(events)
 
 
 def gettomorrowevents(results=250):
@@ -49,13 +49,13 @@ def gettomorrowevents(results=250):
     tomorrowrfc39 = tomorrow.strftime("%Y-%m-%dT00:00:00-01:00")
     dayafter = datetime.datetime.utcnow() + datetime.timedelta(days=2)
     dayafterrfc39 = dayafter.strftime("%Y-%m-%dT00:00:00-01:00")
-    print(tomorrowrfc39, dayafterrfc39)
     print('Getting the upcoming %i events' % results)
     events_result = initiate().events().list(calendarId=config.CALENDAR, maxResults=results, singleEvents=True,
                                              timeMin=tomorrowrfc39, timeMax=dayafterrfc39,
                                              orderBy='startTime').execute()
     events = events_result.get('items', [])
-    oraganisetolist(events)
+    return oraganisetolist(events)
+
 
 
 def oraganisetolist(events):

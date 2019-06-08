@@ -33,7 +33,8 @@ async def on_message(message):
 
     if message.content.startswith('!nextevent'):
         contentlist = googlecalendar.getrecentevents(1)
-        if contentlist[3] == 1:
+        print(contentlist)
+        if contentlist[3] == 1: # TODO: FIX THIS PART
             await message.channel.send("The event next is %s on the %s at %s for %s hour in %s." % (
             contentlist[4], contentlist[0], contentlist[1], contentlist[3], contentlist[5]))
         else:
