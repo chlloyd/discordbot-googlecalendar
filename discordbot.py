@@ -7,7 +7,7 @@ import time
 import googlecalendar
 import config
 
-alarm_time = '18:09'
+alarm_time = '20:42'
 
 client = discord.Client()
 
@@ -74,18 +74,21 @@ async def tomorrows_events():
     await client.wait_until_ready()
     while not client.is_closed:
         channel = discord.utils.get(client.get_all_channels(), name='general')
+        print("channel", channel)
 
         now = datetime.datetime.strftime(datetime.datetime.now(), '%H:%M')
         # get the difference between the alarm time and now
         diff = (datetime.datetime.strptime(alarm_time, '%H:%M') - datetime.datetime.strptime(now, '%H:%M')).total_seconds()
-
+        print("diff", diff)
         # create a scheduler
         s = sched.scheduler(time.perf_counter, time.sleep)
+        print("s", s)
         # arguments being passed to the function being called in s.enter
-        args = (channel.send(tomorrowevents()))1
+
         # enter the command and arguments into the scheduler
         seconds = datetime.timedelta(hour=diff.hour, minute=diff.minute).total_seconds()
-        s.enter(seconds, 1, client.loop.create_task, args)
+        print("seconds", seconds)
+        s.enter(seconds, 1, client.loop.create_task, channel.send(tomorrowevents()))
         s.run()  # run the scheduler, will block the event loop
 
 
