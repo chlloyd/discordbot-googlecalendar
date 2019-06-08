@@ -33,7 +33,8 @@ def initiate():
 
 def getrecentevents(results):
     # Call the Calendar API
-    now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time
+    now = datetime.datetime.astimezone(datetime.datetime.utcnow()).isoformat()
+    print(now)
     # print('Getting the upcoming %i events' % results)
     events_result = initiate().events().list(calendarId=config.CALENDAR,
                                              timeMin=now,
