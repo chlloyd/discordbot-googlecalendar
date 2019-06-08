@@ -10,3 +10,6 @@ Send reminders of events for an upcoming group project.
 - [ ] Return a specified amount of dates with command and parameter
 - [ ] Send message at 6PM of events for the next day
 - [ ] Deploy onto heroku or raspberry pi
+
+## Bugs
+- [ ] Next event stills returns event currently taken place because of British Summer time. 
