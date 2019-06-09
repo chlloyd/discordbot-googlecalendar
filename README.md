@@ -13,3 +13,4 @@ Send reminders of events for an upcoming group project.
 
 ## Bugs
 - [ ] Next event stills returns event currently taken place because of British Summer time. 
+- [ ] Scheduled event isn't being sent
