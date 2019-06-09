@@ -1,12 +1,16 @@
 import datetime
+import json
 import pickle
-import os.path
+import os
 from googleapiclient.discovery import build
+import pytz
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from dateutil.parser import parse as dtparse
 
-import config
+CALENDAR = os.getenv("CALENDAR")
+CREDENTIALS = os.getenv("CREDENTIALS")
+TIMEZONE = pytz.timezone('Europe/London')
 
 # If modifying these scopes, delete the file token.pickle.
 SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
@@ -21,8 +25,7 @@ def initiate():
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
-            flow = InstalledAppFlow.from_client_secrets_file(
-                'credentials.json', SCOPES)
+            flow = InstalledAppFlow.from_client_config(json.loads(CREDENTIALS), SCOPES)
             creds = flow.run_local_server()
         with open('token.pickle', 'wb') as token:
             pickle.dump(creds, token)
@@ -33,30 +36,25 @@ def initiate():
 
 def getrecentevents(results):
     # Call the Calendar API
-    now = datetime.datetime.astimezone(datetime.datetime.utcnow()).isoformat()
-    print(now)
-    # print('Getting the upcoming %i events' % results)
-    events_result = initiate().events().list(calendarId=config.CALENDAR,
+    now = datetime.datetime.now(tz=TIMEZONE).isoformat()
+    events_result = initiate().events().list(calendarId=CALENDAR,
                                              timeMin=now,
                                              maxResults=results, singleEvents=True,
                                              orderBy='startTime').execute()
     events = events_result.get('items', [])
-    print(events)
     return oraganisetolist(events)
 
 
 def gettomorrowevents(results=250):
     tomorrow = datetime.datetime.utcnow() + datetime.timedelta(days=1)
-    tomorrowrfc39 = tomorrow.strftime("%Y-%m-%dT00:00:00-01:00")
+    tomorrowrfc39 = tomorrow.strftime("%Y-%m-%dT00:00:00+01:00")
     dayafter = datetime.datetime.utcnow() + datetime.timedelta(days=2)
-    dayafterrfc39 = dayafter.strftime("%Y-%m-%dT00:00:00-01:00")
-    print('Getting the upcoming %i events' % results)
-    events_result = initiate().events().list(calendarId=config.CALENDAR, maxResults=results, singleEvents=True,
+    dayafterrfc39 = dayafter.strftime("%Y-%m-%dT00:00:00+01:00")
+    events_result = initiate().events().list(calendarId=CALENDAR, maxResults=results, singleEvents=True,
                                              timeMin=tomorrowrfc39, timeMax=dayafterrfc39,
                                              orderBy='startTime').execute()
     events = events_result.get('items', [])
     return oraganisetolist(events)
-
 
 
 def oraganisetolist(events):
@@ -66,11 +64,15 @@ def oraganisetolist(events):
         all_appointments = []
         for event in events:
             start = event['start'].get('dateTime', event['start'].get('date'))
+            end = event['end'].get('dateTime', event['end'].get('date'))
 
-            date = datetime.datetime.strftime(dtparse(start), format='%d %B %Y')
-            start = datetime.datetime.strftime(dtparse(start), format='%H:%M')
-            end = datetime.datetime.strftime(dtparse(event['end'].get('dateTime', event['end'].get('date'))),
-                                             format='%H:%M')
+            start_date = dtparse(start)
+            end_date = dtparse(end)
+
+            date = start_date.strftime('%d %B %Y')
+
+            start = start_date.strftime('%H:%M')
+            end = end_date.strftime('%H:%M')
 
             duration = datetime.datetime.strptime(end, "%H:%M") - datetime.datetime.strptime(start, "%H:%M")
             duration = duration.seconds // 3600
@@ -78,10 +80,7 @@ def oraganisetolist(events):
             summary = event['summary']
             location = event["location"]
 
-            try:
-                description = event["description"]
-            except KeyError:
-                description = ""
+            description = event.get('description', '')
 
             appointment = [date, start, end, duration, summary, location, description]
             all_appointments.append(appointment)
