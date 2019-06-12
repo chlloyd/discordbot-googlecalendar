@@ -10,6 +10,7 @@ from dateutil.parser import parse as dtparse
 
 CALENDAR = os.getenv("CALENDAR")
 CREDENTIALS = os.getenv("CREDENTIALS")
+API_KEY = os.getenv("API_KEY")
 TIMEZONE = pytz.timezone('Europe/London')
 
 # If modifying these scopes, delete the file token.pickle.

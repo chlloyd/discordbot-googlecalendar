@@ -17,16 +17,16 @@ def tomorrowevents():
     allevents = googlecalendar.gettomorrowevents()
     message_list = ""
     if allevents:
+        for event in allevents:
+            if event[3] == 1:
+                message_event = "%s in %s at %s for %s hour.\n" % (event[4], event[5], event[1], event[3])
+                message_list += message_event
+            elif event[3] >= 2:
+                message_event = "%s in %s at %s for %s hours.\n" % (event[4], event[5], event[1], event[3])
+                message_list += message_event
+        return "Tomorrow events are as follows:\n" + message_list
+    else:
         return None
-
-    for event in allevents:
-        if event[3] == 1:
-            message_event = "%s in %s at %s for %s hour.\n" % (event[4], event[5], event[1], event[3])
-            message_list += message_event
-        elif event[3] >= 2:
-            message_event = "%s in %s at %s for %s hours.\n" % (event[4], event[5], event[1], event[3])
-            message_list += message_event
-    return "Tomorrow events are as follows:\n" + message_list
 
 
 @client.event
